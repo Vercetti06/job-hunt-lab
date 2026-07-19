@@ -1,0 +1,67 @@
+\documentclass[10.5pt]{article}
+\usepackage[letterpaper, top=0.6in, bottom=0.6in, left=0.75in, right=0.75in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{inkNavy}{HTML}{1B2430}
+\hypersetup{colorlinks=true, urlcolor=inkNavy, linkcolor=inkNavy}
+\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=2pt, parsep=0pt}
+\pagestyle{empty}
+\newcommand{\sectionrule}[1]{%
+  {\vspace{8pt}\color{inkNavy}\bfseries\MakeUppercaseCmd{#1}}\\[-4pt]
+  {\color{inkNavy}\rule{\linewidth}{0.6pt}}\vspace{2pt}\par
+}
+\newcommand{\MakeUppercaseCmd}[1]{\uppercase{#1}}
+
+\begin{document}
+{\color{inkNavy}\bfseries\LARGE \VAR{full_name} }\\[2pt]
+{\small \VAR{contact_line} }
+
+\BLOCK{ if summary }
+\sectionrule{Summary}
+\VAR{summary}
+\BLOCK{ endif }
+
+\BLOCK{ if skills }
+\sectionrule{Skills}
+\VAR{skills | join(' \\textbullet{} ')}
+\BLOCK{ endif }
+
+\BLOCK{ if experience }
+\sectionrule{Experience}
+\BLOCK{ for job in experience }
+\noindent\textbf{\VAR{job.title}} — \VAR{job.company}\BLOCK{ if job.location } (\VAR{job.location})\BLOCK{ endif } \hfill \textit{\VAR{job.start_date} -- \VAR{job.end_date}}\\[2pt]
+\begin{itemize}
+\BLOCK{ for bullet in job.bullets }
+\item \VAR{bullet}
+\BLOCK{ endfor }
+\end{itemize}
+\vspace{2pt}
+\BLOCK{ endfor }
+\BLOCK{ endif }
+
+\BLOCK{ if education }
+\sectionrule{Education}
+\BLOCK{ for edu in education }
+\noindent\textbf{\VAR{edu.degree}}, \VAR{edu.institution}\BLOCK{ if edu.year } (\VAR{edu.year})\BLOCK{ endif }\\
+\BLOCK{ if edu.details }{\small \VAR{edu.details}}\\\BLOCK{ endif }
+\BLOCK{ endfor }
+\BLOCK{ endif }
+
+\BLOCK{ if certifications }
+\sectionrule{Certifications}
+\VAR{certifications | join(' \\textbullet{} ')}
+\BLOCK{ endif }
+
+\BLOCK{ if projects }
+\sectionrule{Projects}
+\begin{itemize}
+\BLOCK{ for proj in projects }
+\item \VAR{proj}
+\BLOCK{ endfor }
+\end{itemize}
+\BLOCK{ endif }
+
+\end{document}

@@ -1,0 +1,35 @@
+{
+  "_comment": "Each entry: which email addresses/domains to treat as job-alert senders, and a regex to pull job posting URLs out of that email's body. Verify against an actual alert email you've received and adjust — senders and email templates do change over time.",
+  "platforms": [
+    {
+      "name": "linkedin",
+      "senders": ["jobalerts-noreply@linkedin.com", "jobs-noreply@linkedin.com"],
+      "url_pattern": "https://[a-z.]*linkedin\\.com/jobs/view/[0-9]+[^\\s\"'<>]*"
+    },
+    {
+      "name": "indeed",
+      "senders": ["alert@indeed.com", "noreply@indeed.com"],
+      "url_pattern": "https://[a-z.]*indeed\\.com/(?:rc/clk|viewjob)[^\\s\"'<>]*"
+    },
+    {
+      "name": "naukri",
+      "senders": ["mailer@naukri.com", "alerts@naukri.com"],
+      "url_pattern": "https://www\\.naukri\\.com/job-listings-[^\\s\"'<>]*"
+    },
+    {
+      "name": "instahyre",
+      "senders": ["noreply@instahyre.com", "alerts@instahyre.com"],
+      "url_pattern": "https://www\\.instahyre\\.com/job/[^\\s\"'<>]*"
+    },
+    {
+      "name": "hirist",
+      "senders": ["noreply@hirist.tech", "alerts@hirist.tech"],
+      "url_pattern": "https://www\\.hirist\\.tech/[^\\s\"'<>]*job[^\\s\"'<>]*"
+    },
+    {
+      "name": "uplers",
+      "senders": ["noreply@uplers.com", "alerts@uplers.com"],
+      "url_pattern": "https://[a-z.]*uplers\\.com/[^\\s\"'<>]*job[^\\s\"'<>]*"
+    }
+  ]
+}

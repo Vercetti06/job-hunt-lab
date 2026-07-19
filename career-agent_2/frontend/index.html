@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Agent</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <div>
+      <h1 class="wordmark">Career Agent<span class="file-no">CASE FILE</span></h1>
+      <div class="tagline">Your personal recruiter, writer, and case tracker.</div>
+    </div>
+    <div class="status-strip" id="status-strip"></div>
+  </div>
+  <div class="card-actions" style="margin-top:10px;">
+    <a class="btn secondary small" href="/api/backup/export" id="backup-export-btn">⬇ Download backup</a>
+    <label class="btn secondary small" style="cursor:pointer;">
+      ⬆ Restore backup
+      <input type="file" id="backup-restore-input" accept=".zip" style="display:none;">
+    </label>
+    <span class="section-sub" id="backup-status" style="align-self:center;"></span>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="profile">Profile</button>
+  <button class="tab-btn" data-tab="search">Search</button>
+  <button class="tab-btn" data-tab="apply">Apply</button>
+  <button class="tab-btn" data-tab="tracker">Tracker</button>
+</nav>
+
+<main>
+
+  <!-- ============ PROFILE ============ -->
+  <section class="folder panel active" id="panel-profile">
+    <h2 class="section-title">Build your profile</h2>
+    <p class="section-sub">A short interview so everything written later actually sounds like you, and is backed by your real history.</p>
+
+    <div id="profile-complete-view" style="display:none;">
+      <div class="stamp applied" style="margin-bottom:16px;">Profile on file</div>
+      <div id="profile-summary" class="doc-preview"></div>
+      <button class="btn secondary small" id="restart-interview-btn">Start over</button>
+    </div>
+
+    <div id="profile-interview-view">
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type your answer…" autocomplete="off">
+        <button class="btn" id="chat-send-btn">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEARCH ============ -->
+  <section class="folder panel" id="panel-search">
+    <h2 class="section-title">Search job boards</h2>
+    <p class="section-sub">Pulls from whichever free job APIs you've configured in <code>.env</code>. Results are ranked by a quick keyword match against your profile — click "Use for Apply" to run the full AI fit + drafting pipeline on any one.</p>
+    <div class="field-row">
+      <input type="text" id="search-query" placeholder="Role or keywords, e.g. 'senior product designer'">
+      <input type="text" id="search-location" placeholder="Location (optional)">
+      <button class="btn" id="search-btn" style="flex:0 0 auto;">Search</button>
+    </div>
+    <div id="search-results" class="card-list"></div>
+
+    <hr class="divider">
+    <h2 class="section-title" style="font-size:17px;">Watched companies</h2>
+    <p class="section-sub">Reads job boards directly from the company's own ATS (Greenhouse, Lever, Ashby, SmartRecruiters) — public endpoints meant for exactly this, and often faster than LinkedIn/Indeed syndication.</p>
+    <div class="field-row">
+      <input type="text" id="company-name" placeholder="Company name, e.g. 'Acme Inc'">
+      <select id="company-ats-type">
+        <option value="greenhouse">Greenhouse</option>
+        <option value="lever">Lever</option>
+        <option value="ashby">Ashby</option>
+        <option value="smartrecruiters">SmartRecruiters</option>
+      </select>
+      <input type="text" id="company-slug" placeholder="Board slug (e.g. 'acme')">
+      <button class="btn small" id="add-company-btn" style="flex:0 0 auto;">Add</button>
+    </div>
+    <div id="watched-companies-list" class="pill-list" style="margin-bottom:14px;"></div>
+    <button class="btn secondary small" id="refresh-watched-btn">Fetch current postings</button>
+    <div id="watched-postings-results" class="card-list" style="margin-top:14px;"></div>
+
+    <hr class="divider">
+    <h2 class="section-title" style="font-size:17px;">Email alert ingestion</h2>
+    <p class="section-sub">Reads job-alert emails from your own Gmail inbox — the saved-search alerts you set up on these platforms. Push-based and instant; no scraping involved. One-time setup required (see README).</p>
+    <div id="gmail-status" class="section-sub"></div>
+    <div class="card-actions">
+      <button class="btn secondary small" id="gmail-authorize-btn">Authorize Gmail</button>
+      <button class="btn small" id="gmail-check-btn">Check for new alerts</button>
+    </div>
+
+    <hr class="divider">
+    <h2 class="section-title" style="font-size:17px;">Bookmarklet clipper</h2>
+    <p class="section-sub">For sites with no API (LinkedIn, Indeed, Naukri, Instahyre, Hirist, Uplers, or anywhere else) — drag this to your bookmarks bar, then click it while viewing a job posting or search results page. It only reads what's already rendered in your browser; no extra requests to the site.</p>
+    <p><a href="#" id="bookmarklet-link" class="btn" style="display:inline-block;">📎 Clip jobs to Career Agent</a></p>
+
+    <hr class="divider">
+    <h2 class="section-title" style="font-size:17px;">Discovered listings</h2>
+    <p class="section-sub">Everything pulled in from email alerts and the clipper, deduplicated.</p>
+    <button class="btn secondary small" id="refresh-clipped-btn">Refresh</button>
+    <div id="clipped-results" class="card-list" style="margin-top:14px;"></div>
+  </section>
+
+  <!-- ============ APPLY ============ -->
+  <section class="folder panel" id="panel-apply">
+    <h2 class="section-title">Apply to a role</h2>
+    <p class="section-sub">Paste a link to one specific job posting. The agent will evaluate fit, then run a drafter → reviewer loop to produce a tailored CV and cover letter.</p>
+    <div class="field-row">
+      <input type="url" id="apply-url" placeholder="https://company.com/careers/job-posting">
+      <button class="btn" id="apply-btn" style="flex:0 0 auto;">Run pipeline</button>
+    </div>
+    <div id="apply-status"></div>
+    <div id="apply-results"></div>
+  </section>
+
+  <!-- ============ TRACKER ============ -->
+  <section class="folder panel" id="panel-tracker">
+    <h2 class="section-title">Application tracker</h2>
+    <p class="section-sub">Every role you've applied to through this tool, with its fit score, documents, and status.</p>
+    <div id="tracker-list" class="card-list"></div>
+  </section>
+
+</main>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

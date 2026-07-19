@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/*.db
+data/gmail_credentials.json
+data/gmail_token.json
+data/generated_documents/
+!data/generated_documents/.gitkeep
