@@ -1,0 +1,36 @@
+\documentclass[10.5pt]{article}
+\usepackage[letterpaper, top=0.9in, bottom=0.9in, left=1in, right=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{inkNavy}{HTML}{1B2430}
+\hypersetup{colorlinks=true, urlcolor=inkNavy, linkcolor=inkNavy}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\pagestyle{empty}
+
+\begin{document}
+{\color{inkNavy}\bfseries\Large \VAR{full_name}}\\
+{\small \VAR{contact_line}}
+
+\vspace{14pt}
+\VAR{date}
+
+\BLOCK{ if recipient or company }
+\VAR{recipient}\BLOCK{ if recipient }\\\BLOCK{ endif }
+\VAR{company}
+\BLOCK{ endif }
+
+\vspace{6pt}
+\VAR{salutation}
+
+\BLOCK{ for para in paragraphs }
+\VAR{para}
+\BLOCK{ endfor }
+
+\vspace{4pt}
+\VAR{closing}\\
+\VAR{full_name}
+
+\end{document}
