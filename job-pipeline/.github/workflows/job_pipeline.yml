@@ -1,0 +1,67 @@
+name: Job Pipeline
+
+on:
+  schedule:
+    # Runs every 5 hours. Cron syntax: minute hour day month weekday
+    # "0 */5 * * *" means: at minute 0, every 5th hour, every day
+    - cron: '0 */5 * * *'
+
+  # workflow_dispatch lets you trigger this manually from the Actions tab.
+  # Use this to test before waiting for the schedule to fire.
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest   # GitHub's free Linux runner
+
+    permissions:
+      contents: write   # Required to git push output files back to this repo.
+                        # Without this, the commit step will get a 403 error.
+
+    steps:
+
+      # ── 1. Check out the repo ─────────────────────────────────────────────
+      # This downloads your repo into the runner's filesystem.
+      # token is passed explicitly so the later git push is authenticated.
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Set up Python ──────────────────────────────────────────────────
+      # Installs Python 3.11 on the runner. The "cache: pip" line tells
+      # GitHub Actions to cache pip packages between runs — faster startup.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ── 3. Install dependencies ───────────────────────────────────────────
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── 4. Run the pipeline ───────────────────────────────────────────────
+      # Secrets are injected as environment variables here.
+      # They are NOT visible in logs — GitHub masks them automatically.
+      - name: Run pipeline
+        env:
+          ADZUNA_APP_ID:  ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          GROQ_API_KEY:   ${{ secrets.GROQ_API_KEY }}
+        run: python scripts/run_pipeline.py
+
+      # ── 5. Commit and push output ─────────────────────────────────────────
+      # git add output/   → stage everything in the output folder
+      # git diff --staged --quiet → check if anything was actually staged
+      #   - exits 0 (success) if nothing changed
+      #   - exits 1 (failure) if there are staged changes
+      # The || after it means: "if that command failed (exit 1), run the next command"
+      # So: only commit if there are actual new files. Avoids empty commits.
+      - name: Commit and push output
+        run: |
+          git config --global user.email "job-pipeline-bot@github-actions.com"
+          git config --global user.name "Job Pipeline Bot"
+          git add output/
+          git diff --staged --quiet || git commit -m "Run: $(date '+%Y-%m-%d %H:%M UTC') — new jobs found"
+          git push
